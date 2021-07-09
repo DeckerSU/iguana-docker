@@ -11,8 +11,19 @@
 
 # Output:
 
+# notaries.json at <stdout> in a form of:
+# [
+#   {
+#     "id": "1",
+#     "passphrase": "fa2511419ea73899a2be34dbd3f172bd173d4d045d1163d4e370305564ea73ce",
+#     "address": "RHSKEzvQD9o3xScf7g64WEpRfGox6zpMYM",
+#     "wif": "UsFnnktnXcvxwGaGsvWfHhD7Ej444YVibyYCJqrRp2jDzWLA2fTo",
+#     "pubkey": "02bb7ab714d858f5da75f93fdb0ab93822f142054262a4425205bb70efe7225394"
+#   },
+# ...
+# ]
 
-nn_count=2
+nn_count=3
 json="[]"
 
 # https://stackoverflow.com/questions/169511/how-do-i-iterate-over-a-range-of-numbers-defined-by-variables-in-bash
