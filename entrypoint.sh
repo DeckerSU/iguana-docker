@@ -54,7 +54,17 @@ fi
 if [[ -z ${1} ]]; then
   echo "Starting iguana..."
   cd /root/dPoW/iguana
-  ./m_notary_LTC 
+  ./m_notary_docker_test
+  sleep 1
+  # https://docs.docker.com/config/containers/multi-service_container/
+  while sleep 60; do
+    ps aux |grep iguana |grep -q -v grep
+    IGUANA_STATUS=$?
+    if [ $IGUANA_STATUS -ne 0 ]; then
+      echo "Iguana has already exited."
+      exit 1
+    fi
+  done
 else
   exec "$@"
 fi

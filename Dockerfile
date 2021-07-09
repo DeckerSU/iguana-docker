@@ -4,6 +4,7 @@ FROM ubuntu:18.04
 LABEL maintainer="DeckerSU <deckersu@protonmail.com>"
 
 # sudo docker run --name iguana1 --privileged --network=bridge -it --rm -e PUBKEY="03d1b38be203e9cad823bb9f1c95de19c18f000bc34bf896760d9666d8c7f6ccac" -e PASSPHRASE="YOUR_VERY_SECURE_PASSPHRASE" iguana-test /bin/bash
+# sudo docker exec -it iguana_1 bash
 # cd root/dPoW/iguana
 # ./m_notary_LTC or ./m_notary_3rdparty
 
@@ -36,6 +37,8 @@ RUN echo "$HOME" > $HOME/dPoW/iguana/userhome.txt \
     && echo "curl --url \"http://127.0.0.1:7779\" --data \"{\\\"method\\\":\\\"walletpassphrase\\\",\\\"params\\\":[\\\"\$PASSPHRASE\\\", 9999999]}\"" > $HOME/dPoW/iguana/wp_7779 && chmod +x $HOME/dPoW/iguana/wp_7779 \
     && echo "pubkey=\$PUBKEY" > $HOME/dPoW/iguana/pubkey.txt
 ADD entrypoint.sh /sbin/
+ADD m_notary_docker_test /root/dPoW/iguana
+ADD docker_test_elected /root/dPoW/iguana
 ENTRYPOINT ["/sbin/entrypoint.sh"]
 
 # CMD ["bash"]
