@@ -1,3 +1,6 @@
+### What's this?
+
+It's automated notarizations testnet environment.
 
 ### How it works?
 
@@ -127,7 +130,7 @@ curl -s --url "http://127.0.0.1:7779" --data '{"coin":"DECKER","agent":"iguana",
 To connect container console use `sudo docker exec -it iguana_X bash`, to quit (de-attach console) from console and leave container working press
 `Ctrl-P` followed by `Ctrl-Q` inside docker interactive console.
 
-To watch iguana log from specific container you can use `sudo docker exec iguana_3 tail -f /root/dPoW/iguana/iguana.log`. 
+To watch iguana log from specific container you can use `sudo docker exec -it iguana_3 tail -f /root/dPoW/iguana/iguana.log`.
 
 
 ### F.A.Q.
