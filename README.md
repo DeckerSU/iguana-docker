@@ -1,10 +1,10 @@
 ### What's this?
 
-It's automated notarizations testnet environment.
+It's an automated dPoW notarizations testnet environment.
 
 ### How it works?
 
-We have a PC with 2 daemons running (KMD, DECKER), for example. Also we have a 3 docker containers with separate iguana / notary node in each. Using iptables rules we fool iguana, forced it to think that it connected to the daemon RPC at 127.0.0.1, but in real all iguanas connected to the same coin daemon installed on docker host. So, it's just a transparent port forwarding of `127.0.0.1:RPC_PORT -> 172.17.0.1:RPC_PORT`. As a result we have just one daemon per coin utilized by as many notaries as we want, that perfectly fits in dev purposes, bcz we don't need as many physical hosts as many notaries we have.
+We have a PC with 2 daemons running (KMD, DECKER), for example. Also we have a 3 docker containers with separate iguana / notary node in each. Using iptables rules we fool iguana, forcing it to think that it is connected to the daemon RPC at 127.0.0.1, but all iguanas are actually connected to the same coin daemon installed on docker host. So, it's just a transparent port forwarding of `127.0.0.1:RPC_PORT -> 172.17.0.1:RPC_PORT`. As a result we have just one daemon per coin utilized by as many notaries as we want, that perfectly fits in dev purposes, bcz we don't need separate physical hosts for each notary.
 
 ![guana_docker](./iguana_docker.png)
 
@@ -32,7 +32,7 @@ Generate `notaries.json` file:
 ```
 prepare-notaries.sh > notaries.json
 ```
-Will be look like:
+Will look like:
 ```
 [
   {
@@ -51,7 +51,7 @@ parse_notaries.py notaries.json
 The following files will be generated:
 
 - `docker_test_elected` - elected file for iguana testnet
-- `import_privkeys` - file with privkeys in daemon import convenient format
+- `import_privkeys` - file with privkeys in convenient daemon import format
 - `m_notary_docker_test` - iguana startup file (will be placed inside a docker container on next step)
 - `start_containers` - script with start_containers instructions 
 
@@ -64,14 +64,14 @@ sudo docker build -t iguana-test .
 
 By default testnet will be configured with all mainnet assetchains enabled, that means that
 RPC requests to any mainnet ACs from inside of the docker container will be forwarded to
-decker host, additionally special test assetchain `DECKER` will be configured to dPoW in KMD
+docker host. An additional special test assetchain `DECKER` will be configured to dPoW in KMD
 by default.
 
 Params of `DECKER` AC is following:
 ```
 -ac_name=DECKER -ac_supply=777777 -ac_reward=100000000
 ```
-Start `komodod` on docker host with the args above and after it create config file in 
+Start `komodod` on docker host with the args above and after it creates the config file in 
 `~/.komodo/DECKER/DECKER.conf` - stop it and add following lines;
 ```
 rpcbind=172.17.0.1
@@ -79,20 +79,21 @@ rpcallowip=172.17.0.1/16
 ```
 Where `172.17.0.1/16` is the default docker `bridge subnet`. You can get docker subnets via
 `sudo docker network ls`, and inspect needed subnet with `sudo docker network inspect bridge`,
-where `bridge` here is a subnet name. Also you'll need to change RPC credentials in the
-`~/.komodo/DECKER/DECKER.conf` on following:
+where `bridge` here is a subnet name.
+You'll also need to change RPC credentials in the
+`~/.komodo/DECKER/DECKER.conf` to the following:
 ```
 rpcuser=rpcuser
 rpcpassword=bitcoin123
 ```
-This is needed bcz iguana in docker container using that credentials by default for ANY (!) deamon,
-if other not specified by variables `DEFAULT_RPC_USERNAME` and `DEFAULT_RPC_PASSWORD` by passing 
+This is needed bcz iguana in docker container is those credentials by default for ANY (!) deamon,
+if not otherwise specified by variables `DEFAULT_RPC_USERNAME` and `DEFAULT_RPC_PASSWORD` via passing 
 environment variables to container, during start.
 
-But only only `DECKER` AC is active to dPoW by default. If you want to add any other chains in
+Only `DECKER` AC is active to dPoW by default. If you want to add any other chains in
 `m_notary_docker_test` - feel free to add them, but you'll need to properly set-up `rpcbind`,
 `rpcallowip`, `rpcuser` and `rpcpassword` in their `.conf` file. Same applies and to `KMD` 
-itself (mean, you must change these variables in `komodo.conf`).
+itself (i.e. you must change these variables in `komodo.conf`).
 
 Start `KMD` and `DECKER` assetchains on docker host:
 
@@ -101,7 +102,7 @@ Start `KMD` and `DECKER` assetchains on docker host:
 ~/komodo/src/komodod -opretmintxfee=0.004 -minrelaytxfee=0.000035 &
 ```
 
-Import privkeys to each daemon, using `import_privkeys` file content as a helper.
+Import privkeys to each daemon, using `import_privkeys` file contents as a helper.
 
 Send the funds to the notaries addresses.
 
@@ -111,24 +112,25 @@ Launch containers automatically via:
 ```
 source start_containers
 ```
-Also, if you want you can start one of containers in interactive mode:
+To start one of containers in interactive mode:
 ```
 sudo docker run --name iguana_<X> --privileged --network=bridge -it --rm -e PUBKEY="<PUBKEY>" -e PASSPHRASE="<PASSPHRASE>" iguana-test bash
 ```
-where `X` is notary and `PUBKEY` and `PASSPHRASE` params of selected node from `notaries.json`. In case of start container manually in 
-interactive mode to start dPoW use the following:
+where `X` is notary, and `PUBKEY` and `PASSPHRASE` are params of selected node from `notaries.json`. In case of starting the container manually in 
+interactive mode, to start dPoW use the following:
 ```
 cd $HOME/dPoW/iguana
 ./m_notary_docker_test
 ```
 
-Don't forget to attach to the each container and do initial splitfunds:
+Don't forget to attach to each container and do initial splitfunds:
 ```
 curl -s --url "http://127.0.0.1:7779" --data '{"coin":"KMD","agent":"iguana","method":"splitfunds","satoshis":"10000","sendflag":1,"duplicates":"50"}'
 curl -s --url "http://127.0.0.1:7779" --data '{"coin":"DECKER","agent":"iguana","method":"splitfunds","satoshis":"10000","sendflag":1,"duplicates":"50"}'
 ```
-To connect container console use `sudo docker exec -it iguana_X bash`, to quit (de-attach console) from console and leave container working press
+To connect to the container console use `sudo docker exec -it iguana_X bash`. To quit (detach console) and leave the container working press
 `Ctrl-P` followed by `Ctrl-Q` inside docker interactive console.
+
 
 To watch iguana log from specific container you can use `sudo docker exec -it iguana_3 tail -f /root/dPoW/iguana/iguana.log`.
 
@@ -165,7 +167,6 @@ curl --trace-time -v --user rpcuser:bitcoin123 --data-binary '{"jsonrpc": "1.0",
 
 #### How to stop all runned docker containers?
 
-It's simple:
 ```
 sudo docker stop $(sudo docker ps -q -a)
 ```
