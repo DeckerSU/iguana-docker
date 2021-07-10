@@ -29,8 +29,22 @@ json="[]"
 # https://stackoverflow.com/questions/169511/how-do-i-iterate-over-a-range-of-numbers-defined-by-variables-in-bash
 for i in $(seq 1 ${nn_count}); do 
     echo "--> Deploying credentials for NN#${i}" 1>&2
-    passphrase=$(openssl rand 32 | xxd -p -c 32)
-    #passphrase="myverysecretandstrongpassphrase_noneabletobrute"
+
+    passphrase=$(openssl rand 16 | xxd -p -c 16)
+
+    # nb! never use 64 symbols hex string as an iguana passphrase, somewhere it interprets it by other way (not
+    # like passphrase probably) and code execution goes by some other route, for example for passphrase
+    # fa2511419ea73899a2be34dbd3f172bd173d4d045d1163d4e370305564ea73ce we got bunch of messages on walletpassphrase
+    # method execution, like:
+    # couldnt load (confs/6c566d709576729a6884680569c1e20337ba0e58c89e0e40ad1a0d78ffb8d21b)
+    # couldnt load (confs/6c566d709576729a6884680569c1e20337ba0e58c89e0e40ad1a0d78ffb8d21b)
+    # create (RHSKEzvQD9o3xScf7g64WEpRfGox6zpMYM)scriptlen.0 -> (default)
+    # persistent address not found in wallet, autoadd.(RHSKEzvQD9o3xScf7g64WEpRfGox6zpMYM)
+    # couldnt load (confs/6c566d709576729a6884680569c1e20337ba0e58c89e0e40ad1a0d78ffb8d21b)
+    # error parsing decryptstr
+    # and after that splitfunds is failed
+
+    # passphrase="myverysecretandstrongpassphrase_noneabletobrute"
     
     echo "Passphrase: $passphrase" 1>&2
     # better to don't store any binary values in variables, that's why we convert it
