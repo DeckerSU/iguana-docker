@@ -26,9 +26,20 @@ then
   rpcpassword=${DEFAULT_RPC_PASSWORD}
   rpcport=7771
 until_it_ends
+  # test notarized assetchain
+  test_ac_name=DECKER
+  mkdir -p $HOME/.komodo/${test_ac_name}
+  cat << until_it_ends > $HOME/.komodo/${test_ac_name}/${test_ac_name}.conf
+  # dummy config for iguana
+  rpcuser=${DEFAULT_RPC_USERNAME}
+  rpcpassword=${DEFAULT_RPC_PASSWORD}
+  rpcport=49332
+until_it_ends
+
 
   # let's try to fool the client and DNAT a connection to the outside world
   iptables -t nat -A OUTPUT -d 127.0.0.1/32 -p tcp -m tcp --dport 7771 -j DNAT --to-destination ${DOCKER_HOST_IP}:7771 -m comment --comment "KMD rpc redir"
+  iptables -t nat -A OUTPUT -d 127.0.0.1/32 -p tcp -m tcp --dport 49332 -j DNAT --to-destination ${DOCKER_HOST_IP}:49332 -m comment --comment "DECKER rpc redir"
 
   readarray -t kmd_coins < <(cat $HOME/dPoW/iguana/assetchains.json | jq -r '[.[].ac_name] | join("\n")')
   for i in "${kmd_coins[@]}"

@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y \
         libssl-dev \
         zlib1g-dev \
         jq \
+        nano \
     && rm -rf /var/lib/apt/lists/*
 RUN cd $HOME && git clone https://github.com/KomodoPlatform/dPoW
 RUN cd $HOME && git clone https://github.com/nanomsg/nanomsg && cd nanomsg && cmake . -DNN_TESTS=OFF -DNN_ENABLE_DOC=OFF && make -j$(nproc --all) && make install && ldconfig
